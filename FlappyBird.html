@@ -1,0 +1,136 @@
+<html>
+<canvas id="gameCanvas" width="600" height="800"></canvas>
+<div style="display:none;">
+  <img id="bkgrnd" src="bg.png"
+       width="600" height="800">
+	<img id="bird" src="bird.png"
+       width="600" height="800">
+</div>
+<script>
+//http://imgur.com/vpmxZkz.jpg
+//Variables
+	//Bird vars
+var birdY = 400;
+var birdSpeedY = 7.5;
+var jumpPeriod = 4;
+	//Pipe Vars
+var pipe1H = Math.random()*800;
+var pipe2H = Math.random()*-800;
+var pipesW = 660;
+var pipesSpeedX = 6;
+const PIPEWIDTH = 60;
+	//Score Vars
+var score = 0;
+window.onload = function() {
+	canvas = document.getElementById('gameCanvas' );
+	ctx = canvas.getContext('2d');
+	bkgrnd = document.getElementById('bkgrnd');
+	bird = document.getElementById('bird');
+var framesPerSecond=30;	
+setInterval(function() {
+	birdHit()
+	gravity()
+	drawAll()
+	addScore()
+	resetPipes()
+	moveAll()}, 1200/framesPerSecond)
+}
+//Scoring system
+function addScore(){
+	ctx.fillStyle = 'white'
+	ctx.font = "30px Arial"
+	ctx.fillText(score, canvas.width/2, 50)
+	if(pipesW <= -60){
+		score += 1
+	}
+}
+
+//Reset Pipes when at edge
+function resetPipes() {
+	if(pipesW <= -60){
+		pipesW = canvas.width+60
+		randomizePipeH();
+		validPipe()
+	}
+}
+
+//Randomize height
+function randomizePipeH(){
+		pipe1H = Math.random() * 800;
+		pipe2H = Math.random() * -800;
+}
+
+//Check if pipe gap is vaible for bird to pass through
+function validPipe(){
+	if(pipe2H - pipe1H <= -680 | pipe2H - pipe1H >= -500){
+	pipe1H = Math.random() * 800;
+	pipe2H = Math.random() * -800;
+	} else {
+		drawPipes()
+	}
+}
+
+//Draw the pipes
+function drawPipes(){
+	colorRect(pipesW, 0, -PIPEWIDTH, pipe1H, '#92c504')
+	colorRect(pipesW, canvas.height, -PIPEWIDTH, pipe2H, '#92c504')
+}
+
+//Pull bird down
+function gravity() {
+	if(jumpPeriod < 4){
+		jumpPeriod += 0.5;
+		birdY -= 15
+	} if(jumpPeriod > 2){
+		birdY += 3
+	}
+}
+//Reset bird to middle
+function birdReset(){
+	birdY = canvas.height/2
+}
+//Check if bird hit anything
+function birdHit(){
+	if(birdY<=pipe1H|pipe2H-birdY<-800 && pipesW<=80 && pipesW>0){
+		birdReset()
+		score = 0
+		pipesW = 660
+	} else if(birdY>canvas.height){
+		birdReset()
+		score = 0
+		pipesW = 660
+	}
+}
+//Move all objects
+function moveAll(){
+	pipesW -= pipesSpeedX
+	birdY += birdSpeedY
+	document.body.onkeyup = function(e){
+    if(e.keyCode == 32){
+		jumpPeriod *= -1
+		}
+	}
+}
+//Draw all objects
+function drawAll() {
+	ctx.drawImage(bkgrnd, 0, 0)
+	ctx.drawImage(bird, 20, birdY)
+	//colorCircle(20,birdY,12,'#FBE562')
+	validPipe()
+	
+}
+//Shortening functions
+function colorRect(leftX, topY, width,height, drawColor) {
+	ctx.fillStyle = drawColor ;
+	ctx.fillRect(leftX,topY,width,height);
+}
+function colorCircle(centerX, centerY, radius, drawColor) {
+	ctx.fillStyle = drawColor;
+	ctx.beginPath();
+	ctx.arc(centerX, centerY, radius, 0, Math.PI*2, true);
+	ctx.fill();
+}
+
+</script>
+
+</html>
